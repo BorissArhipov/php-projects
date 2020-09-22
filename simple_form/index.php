@@ -28,18 +28,57 @@
                     maxlength="3" /></td>
                 </tr>
                 <tr>
-                    14 Chapter 1  PHP Crash Course
+                    <td>Adress</td>
+                    <td><input type="text" name="adress" /></td>
+                </tr>
+                <tr>
                     <td colspan="2" style="text-align: center;"><input type="submit" value="Submit
                     Order" /></td>
                 </tr>
             </table>
         </form>
         <?php 
-            if($_POST["tireqty"]) {
-                $tireqty = $_POST["tireqty"];
-                echo "<p>".$tireqty."</p>";
-            }
-           
+            $tireqty = $_POST['tireqty'];
+            $oilqty = $_POST['oilqty'];
+            $sparkqty = $_POST['sparkqty'];
+            $adress = $_POST['adress'];
+            $date = date('Y-m-d H:i:s');
+
+            $totalqty = 0;
+            $totalqty = $tireqty + $oilqty + $sparkqty;
+
+            echo "<p>Items ordered: ".$totalqty."<br />";
+
+            $totalamount = 0.00;
+
+            define('TIREPRICE', 100);
+
+            define('OILPRICE', 10);
+
+            define('SPARKPRICE', 4);
+
+            $totalamount = $tireqty * TIREPRICE + $oilqty * OILPRICE + $sparkqty * SPARKPRICE;
+
+            echo "Subtotal: $".number_format($totalamount,2)."<br />";
+
+            $taxrate = 0.10; // local sales tax is 10%
+            $totalamount = $totalamount * (1 + $taxrate);
+
+            echo "Total including tax: $" . number_format($totalamount, 2) . "</p>";
+
+
+            $document_root = $_SERVER['DOCUMENT_ROOT'];
+
+            $fp = fopen("$document_root/../orders.txt", 'ab');
+
+            $outputstring = $date."\t".$tireqty." tires \t".$oilqty." oil\t"
+                .$sparkqty." spark plugs\t\$".$totalamount
+                ."\t"." adress \t".$adress."\t";
+
+            flock($fp, LOCK_EX);
+            fwrite($fp, $outputstring, strlen($outputstring));
+            flock($fp, LOCK_UN);
+            fclose($fp);
         ?>
     </body>
 </html>
